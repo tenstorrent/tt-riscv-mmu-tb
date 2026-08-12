@@ -1,0 +1,36 @@
+# Simulation build/run artifacts
+build/
+csrc/
+simv
+simv.daidir/
+*.log
+*.vpd
+*.fsdb
+*.vcd
+ucli.key
+vc_hdrs.h
+
+# pysv / DPI codegen artifacts
+scripts/build/
+scripts/PageTableSV_pkg.sv
+scripts/**/libpysv.so
+
+# Generated page tables
+**/output.json
+generated_pt_output*.json
+
+# Python caches
+__pycache__/
+*.pyc
+
+# Locally fetched/built tool + library deps (bootstrapped by the Makefile)
+external/verilator/
+.venv/
+# UVM 1.2 auto-fetch lands under build/deps (build/ already ignored above);
+# ignore any top-level copy too if UVM_ROOT is overridden here.
+/uvm-1.2/
+
+# Large reference docs (keep local, do not version)
+*.pdf
+regress/temp.yaml
+

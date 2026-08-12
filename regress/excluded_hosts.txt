@@ -1,0 +1,9 @@
+# Hosts excluded from regression dispatch (one per line, '#' comments ok).
+# Consumed by runreg.py --exclude-file (default: this file).
+#
+# Add a host here when a farm node is missing a required runtime, e.g.:
+#   - no Python 3.11 install  -> simv: ModuleNotFoundError: No module named 'encodings'
+#   - no libpython3.11.so.1.0 -> simv: cannot open shared object file
+#   - no lz4frame.h           -> build: fatal error: lz4frame.h: No such file
+#
+# host                 # reason / date

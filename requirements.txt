@@ -1,0 +1,13 @@
+# Python packages for the in-sim page-table generation (PageTableSV / pysv DPI).
+# Install into the python3 the Makefile uses (>= 3.9):
+#   python3 -m pip install --user -r requirements.txt
+#
+# pysv MUST stay pinned to 0.3.1 — 0.4.0's codegen mis-handles the @sv helper
+# calls in PageTableSV.py (build breaks).
+
+pysv==0.3.1        # build-time: codegen PageTableSV.cc + PageTableSV_pkg.sv
+pybind11           # build-time: headers to compile PageTableSV.cc (embeds CPython)
+sortedcontainers   # runtime: imported by riescue gen_pages inside the embedded interpreter
+intervaltree       # runtime: imported by riescue gen_pages inside the embedded interpreter
+z3-solver          # runtime: Verilator's SV randomize() SMT solver (ships a 'z3' CLI);
+                   #          only needed for the Verilator +PT_DYNAMIC / constrained-random flow

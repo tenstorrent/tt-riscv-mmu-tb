@@ -1,0 +1,17 @@
+[submodule "rtl/openc910"]
+	path = rtl/openc910
+	url = https://github.com/akumartt/openc910.git
+	branch = tt-mmu-fixes
+[submodule "external/mem-manager"]
+	path = external/mem-manager
+	url = https://github.com/tenstorrent/mem-manager.git
+[submodule "external/riescue"]
+	path = external/riescue
+	url = https://github.com/tenstorrent/riescue.git
+# NOTE: tt-whisper-mmu uses an ssh URL because the repo is still private;
+# switch it back to https://github.com/tenstorrent/tt-whisper-mmu.git when
+# it is made public, or anonymous clones will fail with "Permission denied".
+[submodule "external/tt-whisper-mmu"]
+	path = external/tt-whisper-mmu
+	url = git@github.com:tenstorrent/tt-whisper-mmu.git
+	ignore = untracked

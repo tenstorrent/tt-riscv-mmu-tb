@@ -1,0 +1,42 @@
+{
+  "_comment": "Sv39 no-fault PT config bounded to the C910's 40-bit PA. mmap high bound = 2^40; pa_and masks every PA to bits [39:12] (40-bit PA, 4KB aligned). Sv39 only; 4KB/2MB pages (satp PPN is 28 bits).",
+
+  "mmap": [["0x80000000", "0x10000000000"]],
+
+  "spaces": {
+    "space1": {
+      "twostage": false,
+      "paging_mode": "sv39",
+      "pages": [
+        {
+          "id": "code_pages",
+          "num_pages": 500,
+          "pa_and": "0x000000FFFFFFF000",
+          "attributes": {
+            "size": ["4kb", "2mb"],
+            "r": 1,
+            "w": 1,
+            "x": 1,
+            "a": 1,
+            "d": 1,
+            "u": 0
+          }
+        },
+        {
+          "id": "data_pages",
+          "num_pages": 500,
+          "pa_and": "0x000000FFFFFFF000",
+          "attributes": {
+            "size": ["4kb", "2mb"],
+            "r": 1,
+            "w": 1,
+            "x": 1,
+            "a": 1,
+            "d": 1,
+            "u": 0
+          }
+        }
+      ]
+    }
+  }
+}

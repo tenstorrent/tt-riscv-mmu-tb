@@ -1,0 +1,51 @@
+tt-riscv-mmu-tb
+Copyright 2026 Tenstorrent USA, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+================================================================================
+
+Third-Party Dependencies:
+
+This repository references the following third-party components as git
+submodules and/or bundled sources. Each component retains its own upstream
+license; consult the respective project for the full terms. The license
+identifiers below are provisional and MUST be verified by OSPO/legal before
+public release.
+
+- OpenC910 (rtl/openc910)
+  XuanTie / T-Head OpenC910 RISC-V core (worked-example DUT).
+  Upstream: https://github.com/T-head-Semi/openc910
+  License: verify with upstream (T-Head OpenC910 open-source license).
+
+- mem-manager (external/mem-manager)
+  Tenstorrent USA, Inc.
+  Upstream: https://github.com/tenstorrent/mem-manager
+  License: Apache-2.0 (verify).
+
+- riescue (external/riescue, third_party/riescue)
+  Tenstorrent USA, Inc. page-table / test generator.
+  Upstream: https://github.com/tenstorrent/riescue
+  License: Apache-2.0 (verify).
+
+- Verilator (third_party/verilator)
+  Verilator SystemVerilog simulator.
+  Upstream: https://github.com/verilator/verilator
+  License: Apache-2.0 OR LGPL-3.0-only (dual; verify).
+
+- Whisper (external/tt-whisper-mmu, third_party/whisper-dvmmu)
+  RISC-V instruction-set simulator used as the reference model.
+  Upstream: verify (currently sourced from an internal repository — see
+  release checklist; the submodule URL must be repointed to a public source
+  or the component vendored before public release).
+  License: verify with upstream.
