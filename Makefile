@@ -143,6 +143,10 @@ WHISPER_OBJ = $(BUILD)/whisper_dv_mmu_dpi.o
 # Paths auto-derive from python3; override for a different site. PY_SHLIB must
 # be a SHARED libpython whose minor matches PY_INC.
 PYSV_DIR    = $(BUILD)/pysv_gen
+# svdpi.h ships with the simulator, not with us: VCS puts it in
+# $(VCS_HOME)/include, Verilator in <root>/include/vltstd. Lazy '=' so it
+# resolves at use time, after $(VERILATOR) is known.
+DPI_INC = $(if $(filter verilator,$(SIM)),$(shell $(VERILATOR) --getenv VERILATOR_ROOT 2>/dev/null)/include/vltstd,$(VCS_HOME)/include)
 PY_INC     ?= $(shell python3 -c "import sysconfig;print(sysconfig.get_path('include'))")
 PYBIND_INC ?= $(shell python3 -c "import os,pysv;print(os.path.join(os.path.dirname(pysv.__file__),'extern'))")
 PY_SHLIB   ?= /usr/lib64/libpython3.11.so.1.0
@@ -183,7 +187,9 @@ SYSMEM_OBJS   = $(SYSMEM_OBJDIR)/util.cc.o $(SYSMEM_OBJDIR)/mem.cc.o \
 #-----------------------------------------------------------------------
 # Tool environment (override on the command line if your site differs)
 #-----------------------------------------------------------------------
-VCS_HOME             ?= /tools_vendor/synopsys/vcs/X-2025.06-SP2
+# VCS_HOME must point at your VCS install (no default is baked in):
+#   make run SIM=vcs VCS_HOME=/path/to/vcs      (or export it)
+VCS_HOME             ?=
 # No licence servers are baked into the repo: export SNPSLMD_LICENSE_FILE
 # (Synopsys) and LM_LICENSE_FILE (FlexLM) in your environment. Both are
 # inherited by the recipes automatically.
@@ -191,12 +197,13 @@ VCS_HOME             ?= /tools_vendor/synopsys/vcs/X-2025.06-SP2
 # -debug_access+all), so it must match VCS_HOME's release -- derived from it by
 # default. No Verdi => no +define+FSDB_EN => mmu_tb_top.sv drops the $fsdbDump*
 # calls, which would otherwise be unresolved system tasks and fail the build.
-VERDI_HOME           ?= /tools_vendor/synopsys/verdi/$(notdir $(VCS_HOME))
+# VERDI_HOME: set it to enable FSDB dumping; unset simply disables it.
+VERDI_HOME           ?=
 FSDB_DEF             := $(if $(wildcard $(VERDI_HOME)),+define+FSDB_EN,)
 
 export VCS_HOME
 export VERDI_HOME
-export PATH := $(VCS_HOME)/bin:$(PATH)
+export PATH := $(if $(VCS_HOME),$(VCS_HOME)/bin:,)$(PATH)
 
 .PHONY: all compile run run-only stage-pylib clean help ptgen smoke
 
@@ -331,17 +338,17 @@ smoke-satp:
 ptgen:
 	mkdir -p $(PYSV_DIR) $(SYSMEM_OBJDIR)
 	python3 scripts/gen_pysv.py $(PYSV_DIR)
-	$(CXX) -std=c++17 -fPIC -I$(PY_INC) -I$(PYBIND_INC) -I$(VCS_HOME)/include \
+	$(CXX) -std=c++17 -fPIC -I$(PY_INC) -I$(PYBIND_INC) -I$(DPI_INC) \
 	    -DPYTHON_LIBRARY='"$(PY_SHLIB)"' \
 	    -c $(PYSV_DIR)/PageTableSV.cc -o $(PYSV_DIR)/PageTableSV.o
 	for s in $(SYSMEM_SRCS); do \
 	    $(CXX) -std=c++20 -fPIC -fpermissive -include bit \
-	      -I$(MEMMGR_DIR) -I$(VCS_HOME)/include \
+	      -I$(MEMMGR_DIR) -I$(DPI_INC) \
 	      -c $$s -o $(SYSMEM_OBJDIR)/$$(basename $$s).o || exit 1; \
 	done
 	$(MAKE) -C $(DVMMU_DIR) CXX=$(CXX) OFLAGS= libdvmmu.a
 	$(CXX) -std=c++20 -fPIC \
-	    -I$(WHISPER_DIR) -I$(DVMMU_DIR) -I$(DVMMU_DIR)/whisper -I$(VCS_HOME)/include \
+	    -I$(WHISPER_DIR) -I$(DVMMU_DIR) -I$(DVMMU_DIR)/whisper -I$(DPI_INC) \
 	    -c $(WHISPER_DIR)/whisper_dv_mmu_dpi.cpp -o $(WHISPER_OBJ)
 
 #-----------------------------------------------------------------------
@@ -530,10 +537,9 @@ PY_REQS       ?= requirements.txt
 ifeq ($(VERILATOR_UVM),1)
 # Derive Python paths from the interpreter (portable). Requires the matching
 # python3-dev/devel headers; if the sysconfig include dir has no Python.h, a
-# site copy is tried before giving up. Override PY_INC/PY_SHLIB if needed.
+# Override PY_INC/PY_SHLIB if the headers live elsewhere.
 PY_INC        ?= $(shell d=$$($(VLT_PY) -c "import sysconfig;print(sysconfig.get_path('include'))"); \
                    if [ -f "$$d/Python.h" ]; then echo "$$d"; \
-                   elif [ -f /tools_vendor/FOSS/python3/include/python3.11/Python.h ]; then echo /tools_vendor/FOSS/python3/include/python3.11; \
                    else echo "$$d"; fi)
 PY_SHLIB      ?= $(shell l=$$($(VLT_PY) -c "import sysconfig,os;print(os.path.join(sysconfig.get_config_var('LIBDIR') or '', sysconfig.get_config_var('INSTSONAME') or ''))"); \
                    if [ -f "$$l" ]; then echo "$$l"; else echo /usr/lib64/libpython3.11.so.1.0; fi)
@@ -565,9 +571,9 @@ VLT_RUN_PYTHONPATH = $(abspath scripts):$(abspath $(RIESCUE_DIR)):$(PY_SITE)
 # (-std=c++20, -fcoroutines); use gcc-toolset-11 when present (RHEL), otherwise
 # rely on a sufficiently new system g++.
 PYBIN_DIR := $(abspath $(BUILD)/pybin)
-# Probed, not required: empty on any distro whose default g++ is already >= 10.
-# Override for a toolchain installed elsewhere, e.g. GCC_TOOLSET_DIR=/opt/gcc-13/bin.
-GCC_TOOLSET_DIR ?= /opt/rh/gcc-toolset-11/root/bin
+# Optional: point at a newer toolchain's bin/ to prepend it to PATH, e.g.
+#   GCC_TOOLSET_DIR=/path/to/gcc/bin                 (see README: GCC >= 10)
+GCC_TOOLSET_DIR ?=
 GCC_TOOLSET := $(firstword $(wildcard $(GCC_TOOLSET_DIR)))
 export PATH := $(PYBIN_DIR)$(if $(GCC_TOOLSET),:$(GCC_TOOLSET)):$(PATH)
 
