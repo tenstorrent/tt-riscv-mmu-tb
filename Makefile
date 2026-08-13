@@ -336,6 +336,11 @@ smoke-satp:
 #      system assembler suffices) + compile its DPI wrapper (whisper_dv_mmu_dpi).
 #-----------------------------------------------------------------------
 ptgen:
+	@# svdpi.h comes from the simulator; with SIM=vcs that means $(VCS_HOME).
+	@# Fail with a useful message instead of '-I/include' -> 'svdpi.h not found'.
+	@if [ "$(SIM)" = "vcs" ] && [ -z "$(strip $(VCS_HOME))" ]; then \
+	  echo "ERROR: VCS_HOME is not set (needed for svdpi.h with SIM=vcs)."; \
+	  echo "       export VCS_HOME=/path/to/vcs   -- see README"; exit 1; fi
 	mkdir -p $(PYSV_DIR) $(SYSMEM_OBJDIR)
 	python3 scripts/gen_pysv.py $(PYSV_DIR)
 	$(CXX) -std=c++17 -fPIC -I$(PY_INC) -I$(PYBIND_INC) -I$(DPI_INC) \
