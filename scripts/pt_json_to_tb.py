@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 Tenstorrent USA, Inc.
 """
 pt_json_to_tb.py - convert a riescue riemap.py output.json into two flat
 text files the SystemVerilog page-table loader reads with $fscanf.

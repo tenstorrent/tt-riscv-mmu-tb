@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 Tenstorrent USA, Inc.
 """Codegen the pysv DPI bridge for PageTableSV.
 
 Emits the C++ bridge (PageTableSV.cc) and the SystemVerilog binding package

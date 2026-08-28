@@ -18,34 +18,46 @@ limitations under the License.
 Third-Party Dependencies:
 
 This repository references the following third-party components as git
-submodules and/or bundled sources. Each component retains its own upstream
-license; consult the respective project for the full terms. The license
-identifiers below are provisional and MUST be verified by OSPO/legal before
-public release.
+submodules and/or as tools resolved/built at build time. Each component
+retains its own upstream license; consult the respective project for the
+full terms.
 
 - OpenC910 (rtl/openc910)
   XuanTie / T-Head OpenC910 RISC-V core (worked-example DUT).
-  Upstream: https://github.com/T-head-Semi/openc910
-  License: verify with upstream (T-Head OpenC910 open-source license).
+  Submodule currently points at a Tenstorrent contributor's personal fork,
+  https://github.com/akumartt/openc910 (branch tt-mmu-fixes), itself forked
+  from https://github.com/XUANTIE-RV/openc910.
+  License: Apache-2.0 (confirmed in both the upstream and fork LICENSE files).
+  NOTE: before public release this submodule should be repointed at an
+  official Tenstorrent-controlled fork/mirror rather than a personal account,
+  so the dependency does not disappear if that personal account is removed
+  or renamed.
 
 - mem-manager (external/mem-manager)
   Tenstorrent USA, Inc.
   Upstream: https://github.com/tenstorrent/mem-manager
-  License: Apache-2.0 (verify).
+  License: Apache-2.0 (confirmed).
 
-- riescue (external/riescue, third_party/riescue)
+- riescue (external/riescue)
   Tenstorrent USA, Inc. page-table / test generator.
   Upstream: https://github.com/tenstorrent/riescue
-  License: Apache-2.0 (verify).
+  License: Apache-2.0 (confirmed).
 
-- Verilator (third_party/verilator)
+- Verilator (resolved via VERILATOR_HOME/PATH, or auto-built from source into
+  the gitignored external/verilator/ if neither is found; not vendored or
+  distributed with this repository)
   Verilator SystemVerilog simulator.
   Upstream: https://github.com/verilator/verilator
-  License: Apache-2.0 OR LGPL-3.0-only (dual; verify).
+  License: LGPL-3.0-only OR Artistic-2.0 (dual-licensed at the user's option;
+  confirmed from upstream). Used only as an external build/simulation tool;
+  no Verilator source is copied into or distributed with this repository.
 
-- Whisper (external/tt-whisper-mmu, third_party/whisper-dvmmu)
-  RISC-V instruction-set simulator used as the reference model.
-  Upstream: verify (currently sourced from an internal repository — see
-  release checklist; the submodule URL must be repointed to a public source
-  or the component vendored before public release).
-  License: verify with upstream.
+- Whisper reference model (external/tt-whisper-mmu)
+  RISC-V instruction-set simulator (nests the swerv-iss "whisper" submodule)
+  used as the golden reference model for translation scoring.
+  Upstream: https://github.com/tenstorrent/tt-whisper-mmu
+  License: Apache-2.0 (confirmed).
+  NOTE: this repository is still private/internal as of this writing. Its
+  submodule URL uses SSH (see .gitmodules) and MUST be repointed to the
+  public HTTPS URL — and the upstream repository itself made public — before
+  this repository is released publicly, or anonymous clones will fail.
